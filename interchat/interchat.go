@@ -6,10 +6,10 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-var newRedis = func(c *Config) redis.UniversalClient {
+var newRedis = func(addr string) redis.UniversalClient {
 	return redis.NewClient(&redis.Options{
 		PoolSize: 10,
-		Addr:     c.RedisAddr,
+		Addr:     addr,
 	})
 }
 
@@ -24,12 +24,12 @@ type Interchat struct {
 }
 
 // New creates new ws server.
-func New(config *Config) (*Interchat, error) {
+func New(config *Config) *Interchat {
 	c := &Interchat{
 		config: config,
-		room:   newRoom("public", newRedis(config)),
+		room:   newRoom("public", newRedis(config.RedisAddr)),
 	}
-	return c, nil
+	return c
 }
 
 // Run starts and runs the server until error happens.

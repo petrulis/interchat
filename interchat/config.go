@@ -13,7 +13,7 @@ type Config struct {
 }
 
 // FromEnv creates new config from env variables.
-func FromEnv() (*Interchat, error) {
+func FromEnv() *Interchat {
 	config := &Config{
 		HttpAddress: os.Getenv("WS_HTTP_ADDRESS"),
 		RedisAddr:   os.Getenv("WS_REDIS_ADDR"),
