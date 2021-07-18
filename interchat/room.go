@@ -35,7 +35,7 @@ type room struct {
 	// stream is underlying data store, where messages are
 	// published and read when needed.
 	stream stream.Stream
-	// forward is a buffered channel that has incoming
+	// forward is a channel that has incoming
 	// messagages, that needs to be send (forwarded) to
 	// other clients in the room.
 	forward chan []byte
