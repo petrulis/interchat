@@ -30,8 +30,7 @@ type room struct {
 	// name is room name.
 	name string
 	// cap is a maximum number of historical messages
-	// to be shown when for the client when new client
-	// connects.
+	// to be shown when new client connects.
 	cap int64
 	// stream is underlying data store, where messages are
 	// published and read when needed.
