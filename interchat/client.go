@@ -31,9 +31,6 @@ type client struct {
 	room *room
 	// options is client options.
 	options *clientOptions
-	// stop is stop channel which is called when client is removed
-	// from the room.
-	stop chan struct{}
 }
 
 // newClient creates new client with default client options.
@@ -47,7 +44,6 @@ func newClientWithOptions(conn *websocket.Conn, r *room, options *clientOptions)
 		send:    make(chan []byte, messageBufferSize),
 		room:    r,
 		options: options,
-		stop:    make(chan struct{}),
 	}
 	return c
 }
