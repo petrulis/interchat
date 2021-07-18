@@ -52,16 +52,16 @@ func newClientWithOptions(conn *websocket.Conn, r *room, options *clientOptions)
 	return c
 }
 
+// read starts reading messages comming from websocket connection and
+// forwarding them to chat room.
 func (c *client) read() {
 	defer c.conn.Close()
-
 	c.conn.SetReadLimit(c.options.readLimit)
 	c.conn.SetReadDeadline(time.Now().Add(c.options.pongWait))
 	c.conn.SetPongHandler(func(string) error {
 		c.conn.SetReadDeadline(time.Now().Add(c.options.pongWait))
 		return nil
 	})
-
 	for {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
@@ -76,6 +76,9 @@ func (c *client) read() {
 	}
 }
 
+// write starts writing messages comming from the chat room to client websocket
+// connection. Ticker makes sure ping message is sent once in a while
+// to keep connection alive.
 func (c *client) write() {
 	ticker := time.NewTicker(c.options.pingPeriod)
 	defer func() {
