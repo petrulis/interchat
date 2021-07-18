@@ -104,7 +104,13 @@ func (s *stream) RevN(ch chan<- []byte, n int64) error {
 		return ErrRevN
 	}
 	for i := len(res) - 1; i >= 0; i-- {
-		ch <- []byte(res[i].Values["message"].(string))
+		if p, ok := res[i].Values["message"]; ok {
+			message, ok := p.(string)
+			if !ok {
+				continue
+			}
+			ch <- []byte(message)
+		}
 	}
 	return nil
 }
