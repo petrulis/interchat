@@ -26,10 +26,6 @@ type StreamOptions struct {
 	OperationTimeout time.Duration
 	// StreamMaxLength sets the MAXLEN option when calling XADD. This creates a
 	// capped stream to prevent the stream from taking up memory indefinitely.
-	// It's important to note though that this isn't the maximum number of
-	// _completed_ messages, but the maximum number of _total_ messages. This
-	// means that if all consumers are down, but producers are still enqueuing,
-	// and the maximum is reached, unprocessed message will start to be dropped.
 	StreamMaxLength int64
 	// Approx determines whether to use the ~ with the MAXLEN
 	// option. This allows the stream trimming to done in a more efficient
