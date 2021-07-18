@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/chat",
+            "env": {
+                "WS_HTTP_ADDRESS": ":3000",
+                "WS_REDIS_ADDR": ":6379",
+            },
+            "args": [
+                "run"
+            ]
+        }
+    ]
+}
