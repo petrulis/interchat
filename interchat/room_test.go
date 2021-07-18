@@ -1,6 +1,7 @@
 package interchat
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -10,19 +11,30 @@ import (
 )
 
 type mockStream struct {
+	revn    func(ch chan<- []byte, n int64) error
+	publish func(msg []byte) error
 }
 
 func (s *mockStream) RevN(ch chan<- []byte, n int64) error {
-	return nil
+	return s.revn(ch, n)
 }
+
 func (s *mockStream) Publish(msg []byte) error {
-	return nil
+	return s.publish(msg)
 }
 
 func TestRoom(t *testing.T) {
 	newStream = func(name string, options *stream.StreamOptions) stream.Stream {
-		return &mockStream{}
+		return &mockStream{
+			publish: func(msg []byte) error {
+				return nil
+			},
+			revn: func(ch chan<- []byte, n int64) error {
+				return nil
+			},
+		}
 	}
+
 	t.Run("joins multiple clients", func(tt *testing.T) {
 		numOfClients := 10000
 		r := newRoom("public", nil)
@@ -70,14 +82,14 @@ func TestRoom(t *testing.T) {
 				send: make(chan []byte),
 			}
 		}
-		for _, client := range clients {
-			r.join <- client
+		for i := range clients {
+			r.join <- clients[i]
 		}
 
 		wg := sync.WaitGroup{}
 		wg.Add(numOfClients)
 
-		ch := make(chan []byte, numOfClients)
+		ch := make(chan []byte, 1000000)
 		after := time.After(1 * time.Second)
 
 		read := func(c *client) {
@@ -94,5 +106,53 @@ func TestRoom(t *testing.T) {
 		r.forward <- []byte("message")
 		wg.Wait()
 		assert.Equal(t, numOfClients, len(ch))
+	})
+
+	t.Run("check message never gets sent on error", func(tt *testing.T) {
+		newStream = func(name string, options *stream.StreamOptions) stream.Stream {
+			return &mockStream{
+				publish: func(msg []byte) error {
+					return fmt.Errorf("error")
+				},
+				revn: func(ch chan<- []byte, n int64) error {
+					return nil
+				},
+			}
+		}
+		r := newRoom("public", nil)
+		go r.open()
+
+		client := &client{
+			send: make(chan []byte, 1),
+		}
+		r.join <- client
+		r.forward <- []byte("message")
+
+		assert.Equal(t, 0, len(client.send))
+	})
+
+	t.Run("check history is received", func(tt *testing.T) {
+		numberOfMessages := 100
+		done := make(chan struct{})
+		newStream = func(name string, options *stream.StreamOptions) stream.Stream {
+			return &mockStream{
+				revn: func(ch chan<- []byte, n int64) error {
+					for i := int64(0); i < n; i++ {
+						ch <- []byte("message")
+					}
+					close(done)
+					return nil
+				},
+			}
+		}
+		r := newRoom("public", nil)
+		go r.open()
+
+		client1 := &client{
+			send: make(chan []byte, numberOfMessages),
+		}
+		r.join <- client1
+		<-done
+		assert.Equal(t, r.cap, int64(len(client1.send)))
 	})
 }

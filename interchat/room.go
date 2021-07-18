@@ -72,12 +72,11 @@ func newRoom(name string, r redis.UniversalClient) *room {
 }
 
 func (r *room) subscribe(client *client) {
-	if err := r.stream.RevN(client.send, r.cap); err != nil {
-		logrus.Error(err)
+	if err := r.stream.RevN(client.send, r.cap); err == nil {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		r.clients[client] = true
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.clients[client] = true
 }
 
 // unsubscribe removes the client from the room.
