@@ -1,4 +1,4 @@
-# Interhat
+# Interchat
 
 Chat service with configurable message history.
 
