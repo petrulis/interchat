@@ -37,8 +37,8 @@ type room struct {
 	// published and read when needed.
 	stream stream.Stream
 	// forward is a buffered channel that has incoming
-	// messagages, that needs to be send (forwrded) to
-	// other client in the room.
+	// messagages, that needs to be send (forwarded) to
+	// other clients in the room.
 	forward chan []byte
 	// join is a channel that is tiggered when new http connection
 	// is upgraded to websocket.
